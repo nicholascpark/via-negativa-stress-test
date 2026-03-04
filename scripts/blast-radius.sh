@@ -5,53 +5,50 @@
 #
 # Usage:
 #   ./blast-radius.sh                          # auto-detect from staged/uncommitted changes
-#   ./blast-radius.sh --branch main            # diff against a branch
-#   ./blast-radius.sh --files "src/auth.ts src/middleware.ts"
+#   ./blast-radius.sh --base main              # diff against a branch
+#   ./blast-radius.sh file1.ts file2.ts        # explicit file list
 
 set -euo pipefail
 
 BRANCH=""
-FILES=""
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+CHANGED_FILES=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --branch) BRANCH="$2"; shift 2 ;;
-        --files) FILES="$2"; shift 2 ;;
+        --base|--branch) BRANCH="$2"; shift 2 ;;
         -h|--help)
-            echo "Usage: $0 [--branch <base>] [--files \"file1 file2\"]"
+            echo "Usage: $0 [--base <branch>] [file1 ...]"
             exit 0 ;;
-        *) echo "Unknown option: $1"; exit 1 ;;
+        *) CHANGED_FILES+=("$1"); shift ;;
     esac
 done
 
-if [[ -n "$FILES" ]]; then
-    CHANGED_FILES="$FILES"
-elif [[ -n "$BRANCH" ]]; then
-    CHANGED_FILES=$(git diff --name-only "$BRANCH"...HEAD 2>/dev/null || git diff --name-only "$BRANCH" HEAD)
-else
-    CHANGED_FILES=$(git diff --name-only HEAD 2>/dev/null || true)
-    STAGED=$(git diff --cached --name-only 2>/dev/null || true)
-    CHANGED_FILES=$(echo -e "${CHANGED_FILES}\n${STAGED}" | sort -u | grep -v '^$')
+if [[ ${#CHANGED_FILES[@]} -eq 0 ]]; then
+    if [[ -n "$BRANCH" ]]; then
+        mapfile -t CHANGED_FILES < <(git diff --name-only "$BRANCH"...HEAD 2>/dev/null || git diff --name-only "$BRANCH" HEAD)
+    else
+        mapfile -t CHANGED_FILES < <(git diff --name-only HEAD 2>/dev/null || true)
+        if [[ ${#CHANGED_FILES[@]} -eq 0 ]]; then
+            mapfile -t CHANGED_FILES < <(git diff --cached --name-only 2>/dev/null || true)
+        fi
+    fi
 fi
 
-if [[ -z "$CHANGED_FILES" ]]; then
-    echo "No changed files detected."
-    exit 0
-fi
+[[ ${#CHANGED_FILES[@]} -eq 0 ]] && { echo "No changed files detected."; exit 0; }
 
 echo "═══════════════════════════════════════════════════"
 echo "  BLAST RADIUS ANALYSIS"
 echo "═══════════════════════════════════════════════════"
 echo ""
 echo "Changed files:"
-echo "$CHANGED_FILES" | sed 's/^/  ✦ /'
+printf '  ✦ %s\n' "${CHANGED_FILES[@]}"
 echo ""
 
 # Extract searchable symbols from changed files
 declare -A SEARCH_TERMS
 
-for file in $CHANGED_FILES; do
+for file in "${CHANGED_FILES[@]}"; do
     [[ ! -f "$REPO_ROOT/$file" ]] && continue
 
     basename_no_ext=$(basename "$file" | sed 's/\.[^.]*$//')
@@ -104,7 +101,7 @@ AFFECTED=""
 for result in $RESULTS; do
     rel=$(realpath --relative-to="$REPO_ROOT" "$result" 2>/dev/null || echo "$result")
     is_self=false
-    for cf in $CHANGED_FILES; do [[ "$rel" == "$cf" ]] && is_self=true && break; done
+    for cf in "${CHANGED_FILES[@]}"; do [[ "$rel" == "$cf" ]] && is_self=true && break; done
     $is_self || AFFECTED="${AFFECTED}${rel}\n"
 done
 

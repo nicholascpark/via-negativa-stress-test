@@ -7,18 +7,40 @@ set -euo pipefail
 # High churn = fragile area that keeps getting patched.
 # Answers: "Is this a fragile area that keeps getting patched?"
 #
-# Usage: ./churn-report.sh <file1> [file2] ...
-
-if [ $# -eq 0 ]; then
-    echo "Usage: churn-report.sh <changed-file> [changed-file...]"
-    exit 1
-fi
+# Usage:
+#   ./churn-report.sh                          # auto-detect from staged/uncommitted changes
+#   ./churn-report.sh --base main              # diff against a branch
+#   ./churn-report.sh file1.py file2.ts        # explicit file list
 
 if ! git rev-parse --show-toplevel &>/dev/null; then
     echo "Error: not inside a git repository."; exit 1
 fi
 
 cd "$(git rev-parse --show-toplevel)"
+
+BASE_BRANCH=""
+CHANGED_FILES=()
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --base) BASE_BRANCH="$2"; shift 2 ;;
+        --help|-h)
+            echo "Usage: churn-report.sh [--base <branch>] [file1 ...]"
+            exit 0 ;;
+        *) CHANGED_FILES+=("$1"); shift ;;
+    esac
+done
+
+if [[ ${#CHANGED_FILES[@]} -eq 0 ]]; then
+    if [[ -n "$BASE_BRANCH" ]]; then
+        mapfile -t CHANGED_FILES < <(git diff --name-only "$BASE_BRANCH"...HEAD 2>/dev/null)
+    else
+        mapfile -t CHANGED_FILES < <(git diff --cached --name-only 2>/dev/null)
+        [[ ${#CHANGED_FILES[@]} -eq 0 ]] && mapfile -t CHANGED_FILES < <(git diff --name-only HEAD~1 2>/dev/null)
+    fi
+fi
+
+[[ ${#CHANGED_FILES[@]} -eq 0 ]] && { echo "No changed files detected."; exit 0; }
 
 echo "═══════════════════════════════════════════════════════"
 echo "  CHURN REPORT"
@@ -27,7 +49,7 @@ echo ""
 
 FLAGS=""
 
-for FILE in "$@"; do
+for FILE in "${CHANGED_FILES[@]}"; do
     if ! git log --oneline -1 -- "$FILE" &>/dev/null; then
         echo "  ⚠ $FILE — no git history (new file?)"
         echo ""

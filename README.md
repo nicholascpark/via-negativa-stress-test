@@ -19,8 +19,9 @@ what am I not seeing in this business plan?
 ### Investigation Scripts (for PRs and code)
 
 ```bash
-./scripts/investigate.sh --branch main        # full investigation
-./scripts/investigate.sh --branch main --quick # blast-radius + co-change only
+./scripts/run-all.sh --base main              # full investigation
+./scripts/blast-radius.sh --base main         # blast-radius only
+./scripts/co-change-gaps.sh --base main       # co-change only
 ```
 
 **Requirements**: bash, git, grep, bc. No external dependencies.
@@ -34,7 +35,7 @@ what am I not seeing in this business plan?
 | `churn-report.sh` | Is this a fragile area that keeps getting patched? |
 | `abandoned-approaches.sh` | What did previous engineers try and abandon here? |
 | `trajectory.sh` | Is this the Nth PR adding complexity without refactoring? |
-| `investigate.sh` | Run all of the above. |
+| `run-all.sh` | Run all of the above. |
 
 ## The Skill
 

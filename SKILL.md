@@ -163,15 +163,10 @@ aren't available, perform these steps manually with git commands.
    Co-change violations are invisible to reasoning — you need the history.
 
 6. If accessible, check roadmap/tickets for what's planned in this area.
-   The canonical finding: a PR that solves today's problem while silently
-   foreclosing next quarter's approach.
-
-Run all at once: `scripts/run-all.sh --base <branch>`
-5. If accessible, check roadmap/tickets for what's planned in this area.
    The canonical embedded-artifact finding: a PR that solves today's problem
    while silently foreclosing next quarter's approach.
 
-**To run all investigations at once:** `scripts/run-all.sh [base-branch]`
+**To run all investigations at once:** `scripts/run-all.sh --base <branch>`
 
 ### For config / infrastructure changes:
 1. Map what services or systems consume this config.
