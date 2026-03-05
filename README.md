@@ -1,8 +1,16 @@
 # Via Negativa Stress Test
 
-A via negativa analysis framework and toolset for reviewing any artifact — code, PRs, designs, strategies, or ideas — by surfacing what's **absent, assumed, or excluded**.
+A metacognitive skill that equips an LLM with apophatic perception — the ability to see what's **absent, assumed, and structurally excluded** from any artifact or system.
 
-Most review asks *"is what's here correct?"* This asks *"what's NOT here, and does its absence matter?"*
+Most review asks *"is what's here correct?"*
+Most debugging asks *"where is the error?"*
+This asks *"what's NOT here, and does its absence matter?"*
+
+## Two Modes
+
+**Prophetic** (review / stress test): Nothing is broken yet. What's absent that will become the failure? What's invisible that would change the decision if seen?
+
+**Diagnostic** (debugging / root cause): Something is broken. What structural absence made this class of failure inevitable? What's missing from the system that would make this bug impossible?
 
 ## Quick Start
 
@@ -11,9 +19,15 @@ Most review asks *"is what's here correct?"* This asks *"what's NOT here, and do
 Drop `SKILL.md` and `references/` into your Claude project or skill directory. Then:
 
 ```
+# Prophetic mode
 stress test this PR
 poke holes in this architecture doc
 what am I not seeing in this business plan?
+
+# Diagnostic mode
+why does this test keep flaking?
+what's really going on with this memory leak?
+this bug doesn't make sense — what am I missing?
 ```
 
 ### Investigation Scripts (for PRs and code)
@@ -39,7 +53,10 @@ what am I not seeing in this business plan?
 
 ## The Skill
 
-Four-layer progressive analysis: Absence Inventory → Load-Bearing Assumptions → Frame Exclusions → Via Negativa Design. See `SKILL.md` for full details.
+Four-layer progressive analysis: **Absence Inventory** → **Load-Bearing Assumptions** → **Frame Exclusions** → **Via Negativa Design**. Default depth includes frame analysis (Layers 1–3) — that's where the differentiating insight lives.
+
+See `SKILL.md` for full methodology.
+See `references/` for worked examples (code review, strategy, debugging).
 
 ## License
 
