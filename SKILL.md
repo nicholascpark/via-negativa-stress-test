@@ -1,38 +1,101 @@
 ---
 name: via-negativa-stress-test
 description: >
-  Apply rigorous via negativa analysis to ANY artifact — code, pull requests, git branches,
-  entire codebases, subdirectories, images, UI screenshots, emails, datasets, configs,
-  strategies, documents, architectures, processes, conversations, or ideas. Use this skill
-  whenever the user asks to "stress test", "poke holes in", "find what's missing", "challenge
-  assumptions", "red team", "devil's advocate", "what am I not seeing", "what could go wrong",
-  or any request to critically examine an artifact by surfacing what is absent, assumed, or
-  excluded. Also trigger when the user mentions "via negativa", or "negative space
-  analysis". Truly target-agnostic: if something exists, this skill can analyze what's missing
-  from it.
+  A metacognitive skill that equips an LLM with apophatic perception — the ability
+  to see what's absent, assumed, and structurally excluded from any artifact. Use for
+  two modes: PROPHETIC (stress test, review, "poke holes in", "what am I not seeing",
+  "what could go wrong", "challenge assumptions", "red team", "devil's advocate") and
+  DIAGNOSTIC (debugging, "why does this keep happening", "what's really going on",
+  "root cause", "why did this break", "this doesn't make sense"). Trigger on any
+  request to critically examine an artifact by surfacing what is absent, assumed, or
+  excluded, OR to understand a failure by finding the structural gap that made it
+  inevitable. Also trigger on "via negativa" or "negative space analysis". Truly
+  target-agnostic: code, PRs, bugs, incidents, strategies, architectures, designs,
+  conversations, ideas — if something exists, this skill can perceive what's missing
+  from it. If something is broken, this skill can find the absence it fell through.
 ---
 
 # Via Negativa Stress Test
 
+## What This Skill Is
+
+This is not a review tool. This is not a debugging tool. Those already exist.
+
+This is a **metacognitive operating system** — a way of perceiving that finds
+what's invisible from inside the system that produced the artifact. It equips
+an LLM to do what humans structurally cannot: see the frame from outside the
+frame.
+
+Two modes of perception, one underlying method:
+
+- **Prophetic mode**: Nothing is broken yet. What's absent that will become
+  the failure? What's invisible that would change the decision if seen?
+- **Diagnostic mode**: Something is broken. What structural absence made this
+  class of failure inevitable? What's missing from the system that would make
+  this bug impossible?
+
+Both modes use the same cognitive operations — apophatic thinking (knowing by
+negation) and frame analysis (seeing the paradigm, not just the content). The
+difference is the entry point and the shape of the output.
+
 ## Core Principle
 
 Most review asks: **"Is what's here correct?"**
+Most debugging asks: **"Where is the error?"**
 This skill asks: **"What's NOT here, and does its absence matter?"**
 
 Every artifact is shaped as much by what it omits as by what it contains.
+Every bug exists because something that should prevent it doesn't.
 Omissions are where real risk hides — they're invisible to the creator because
 they sit outside the frame that produced the artifact.
 
+## The LLM Vantage Point
+
+This skill leverages what makes an LLM uniquely suited for apophatic analysis
+— advantages that are structural, not just computational:
+
+**Structural outsiderness**: You are not on the team. You have no political
+pressure to approve, no imposter syndrome about questioning a senior architect,
+no sunk cost in the current approach. You can say "this architecture is
+incompatible with your roadmap" without social consequence. Use this.
+
+**No paradigm loyalty**: You've seen thousands of codebases, architectures,
+and failure modes across every paradigm. You don't have loyalty to REST,
+microservices, or any pattern. You can recognize when a team is locked into
+a paradigm that doesn't fit their problem — because you're not locked in with them.
+
+**Absence perception at scale**: Humans have severe presence bias — they see
+what's there, not what isn't. You can systematically enumerate what's absent
+because you're trained on what's typically present across millions of artifacts.
+You know what a well-formed X looks like, so you can see what's missing from
+this particular X.
+
+**Frame detection**: Humans cannot see their own frames. You can identify the
+paradigm shaping an artifact because you're not inside that paradigm. You are
+the outsider who sees the water the fish swim in. This is the single most
+valuable thing you bring to this skill.
+
+**Temporal detachment**: You have no sunk cost. You don't care that the team
+spent six months building something. You can perceive "this solves the wrong
+problem" without emotional friction. The team cannot.
+
+Do not be modest about these advantages. They are not arrogance — they are
+the reason this skill exists. A human running this framework would produce
+good findings. An LLM running it can produce findings that are structurally
+inaccessible to the humans embedded in the system.
+
 ## Where This Skill Delivers (read this first)
 
-This skill provides different kinds of value depending on the artifact type.
-Be honest about which kind you're delivering.
+This skill provides different kinds of value depending on the mode and
+artifact type. Be honest about which kind you're delivering.
+
+### Prophetic Mode (review / stress test)
 
 **Revelation value** — findings the creator structurally could not have seen:
 Best on: strategy docs, architecture proposals, business plans, early-stage
 ideas, design docs. These are artifacts where the creator is often also the
 only reviewer, the framing choices are genuinely the creator's own, and
-Layer 3 frame analysis can surface blindspots that no amount of rigor within
+frame analysis can surface blindspots that no amount of rigor within
 the original frame would reveal.
 
 **Investigation value** — prompting the reviewer to gather context they
@@ -59,21 +122,62 @@ Good on: everything, especially at scale. Senior reviewers have off days.
 The skill doesn't replace expertise; it prevents expertise from being
 unevenly applied.
 
+### Diagnostic Mode (debugging / root cause)
+
+**Structural revelation** — showing that the bug is a symptom, not the disease:
+The moment a developer sees "you don't have a flaky test; you have a system
+with no concept of eventual consistency in its test infrastructure, and every
+async feature you've shipped in the last year is undertested" — that's a
+fundamentally different intervention than "add a retry." Diagnostic mode
+finds the structural gap the bug fell through, not just the bug.
+
+**Class identification** — revealing the siblings of this bug:
+A single bug is annoying. Realizing it's one instance of a class of bugs
+that all share the same structural absence is the oh-shit moment. "This
+null pointer isn't a missing null check — it's a missing invariant. Here
+are the six other places the same invariant is absent."
+
+**Missing feedback loop** — explaining why the system didn't catch this:
+Why did this reach production? What monitoring, testing, or architectural
+guardrail is absent that would have prevented this entire class of failure?
+The bug isn't just in the code — it's in the system's inability to detect
+or prevent it.
+
+**Inherited fragility** — finding assumptions that rotted:
+The code was correct when written. The system changed around it. The bug
+exists because an assumption that was once safe became load-bearing without
+anyone noticing. This is invisible to the person debugging because they're
+looking at the code, not at the history of the system's evolution around it.
+
 Do not oversell. If you're providing consistency value, don't frame it as
-revelation. If a finding is something a competent senior reviewer would
+revelation. If a finding is something a competent senior engineer would
 catch on a good day, say so — and then say why it's still worth flagging.
 
 ## How It Works: Progressive Disclosure
 
-The skill operates in **four layers**, each deeper than the last. By default,
-run Layers 1–2. Go to Layer 3 when stakes are high. Layer 4 is generative
-and optional — use it when the user wants constructive output, not just critique.
+The skill operates in **four layers**, each deeper than the last. The layers
+apply to both prophetic and diagnostic modes — the questions are the same,
+the entry point differs.
 
-The user can request a specific depth:
-- "Quick check" → Layer 1 only
-- "Stress test" → Layers 1–2 (default)
-- "Deep analysis" → Layers 1–3
-- "Full via negativa" → All four layers
+### Prophetic mode entry (review / stress test):
+Start from Step 0 (Intake) → Step 0.5 (Context Acquisition) → Layers.
+
+### Diagnostic mode entry (debugging / root cause):
+Start from Step D (Diagnostic Intake) → then join the layer progression.
+See the Diagnostic Mode section below.
+
+### Depth levels:
+
+The default depth is "Stress test" — Layers 1–3. This is intentional.
+**Layer 3 (Frame Exclusions) is where this skill's differentiating insight
+lives.** Layers 1–2 without Layer 3 produces competent findings that overlap
+with standard review. Layer 3 is what makes the output something the creator
+could not have produced from inside their own frame. Don't save it for
+"special occasions" — it IS the skill.
+
+- "Quick check" → Layers 1–2 (fast but less differentiated)
+- "Stress test" → Layers 1–3 (default — includes frame analysis)
+- "Full via negativa" → All four layers (includes generative design)
 
 ---
 
@@ -163,15 +267,10 @@ aren't available, perform these steps manually with git commands.
    Co-change violations are invisible to reasoning — you need the history.
 
 6. If accessible, check roadmap/tickets for what's planned in this area.
-   The canonical finding: a PR that solves today's problem while silently
-   foreclosing next quarter's approach.
-
-Run all at once: `scripts/run-all.sh --base <branch>`
-5. If accessible, check roadmap/tickets for what's planned in this area.
    The canonical embedded-artifact finding: a PR that solves today's problem
    while silently foreclosing next quarter's approach.
 
-**To run all investigations at once:** `scripts/run-all.sh [base-branch]`
+**To run all investigations at once:** `scripts/run-all.sh --base <branch>`
 
 ### For config / infrastructure changes:
 1. Map what services or systems consume this config.
@@ -206,6 +305,87 @@ Once context is acquired, reframe each layer's question for embedded artifacts:
 
 If the answer is "no one decided that," you've found an assumption that was
 introduced silently. These are the highest-value findings for embedded artifacts.
+
+---
+
+## Step D: Diagnostic Intake (for debugging / root cause analysis)
+
+When the user brings a bug, incident, or failure — not an artifact to review —
+use diagnostic mode. The goal is not to find the bug (the user often already
+knows the symptom). The goal is to find the **structural absence** that made
+this class of bug inevitable.
+
+Normal debugging asks: "Where is the error?"
+Diagnostic via negativa asks: "What's missing from this system that would
+make this error impossible?"
+
+### Diagnostic acquisition:
+
+1. **Understand the symptom**: What's broken? Get the error, the behavior,
+   the reproduction steps. Don't skip this — you need the symptom to trace
+   backwards to the structure.
+
+2. **Map the assumption chain**: Trace the path from "working correctly" to
+   "broken." At each step, ask: "What must be true for this step to work?"
+   The bug lives where an assumption in this chain is false.
+
+3. **Find the structural gap**: The bug is one instance. What's ABSENT from
+   the system that would prevent the entire CLASS of bugs like this?
+   - Missing invariant enforcement?
+   - Missing lifecycle management?
+   - Missing contract between components?
+   - Missing feedback loop (monitoring, testing, type system)?
+
+4. **Identify the siblings**: If the structural gap exists, this probably
+   isn't the only bug living in it. What other failures does the same
+   absence enable? These are the siblings — the bugs that haven't manifested
+   yet but share the same structural cause.
+
+5. **Find the inherited fragility**: Was the code correct when written? If
+   so, what changed in the system around it that made a safe assumption
+   dangerous? This is often invisible to the person debugging because
+   they're looking at the code, not at the system's evolution.
+
+### Diagnostic layers:
+
+After diagnostic intake, apply the same four layers with a diagnostic lens:
+
+- **Layer 1** becomes: "What's absent that would prevent this class of failure?"
+  Not "what's missing from the code" but "what's missing from the system's
+  defenses against this kind of bug?"
+
+- **Layer 2** becomes: "What assumption was this code relying on, and when
+  did it stop being true?" Distinguish between assumptions that were always
+  wrong (design bug) and assumptions that rotted (the system evolved around
+  them).
+
+- **Layer 3** becomes: "Is the debugging frame itself the problem?" Often
+  a bug persists because the team is debugging within a frame that excludes
+  the actual cause. "We keep looking at the application layer but the
+  problem is in the infrastructure." "We keep profiling CPU but the
+  bottleneck is I/O." Frame mismatch between the debugging approach and
+  the bug's actual nature.
+
+- **Layer 4** becomes: "What would a system look like that structurally
+  cannot produce this class of bug?" The generative move: not "fix this
+  bug" but "what's the minimum architectural intervention that closes
+  the structural gap?"
+
+### The diagnostic oh-shit moment:
+
+The profound output of diagnostic mode is NOT "here's the fix." It's the
+moment when the developer sees that:
+
+> "This isn't a bug. This is your system telling you something about itself
+> that you've been unable to hear. The bug is a message — it's revealing a
+> structural absence that's been there all along, and this is just the first
+> place it became visible."
+
+The fix for the symptom is usually obvious once you see the structure. The
+value is in seeing the structure.
+
+### Diagnostic examples:
+See `references/debugging-examples.md` for worked examples.
 
 ---
 
@@ -446,10 +626,9 @@ filtered hard enough. If you have fewer than 3, you may need to look deeper
 or the artifact is genuinely solid (which is a valid finding: say so).
 
 ### Scaling
-- **Quick pass** (5 min): Layer 1 only, top 3 absences
-- **Standard review** (15 min): Layers 1–2, full findings
-- **Deep review** (30 min): Layers 1–3, with frame analysis
-- **Generative session**: All 4 layers, produces constructive recommendations
+- **Quick check**: Layers 1–2, top findings per layer
+- **Standard (default)**: Layers 1–3, full findings with frame analysis
+- **Full via negativa**: All 4 layers, includes generative design
 
 ### When the artifact is solid
 The skill should not manufacture findings. If the Relevance Gate filters out
@@ -459,11 +638,14 @@ The worst failure mode of this skill is generating performative criticism
 of something that's actually good. Via negativa rigor means being honest about
 the *presence* of quality, not just the absence of it.
 
-### Combining with other review methods
-This skill complements (doesn't replace) standard review practices.
+### Combining with other methods
+In prophetic mode, this skill complements (doesn't replace) standard review.
 Use it alongside, not instead of, functional correctness checks.
-The absence inventory (Layer 1) overlaps with standard review;
-Layers 2–4 are where this approach adds unique value.
+
+In diagnostic mode, this skill complements (doesn't replace) standard
+debugging. Use it after the symptom is identified, not instead of tracing
+the error. The value is not in finding the bug faster — it's in seeing
+what the bug reveals about the system.
 
 ### Compound artifacts
 Sometimes the target is not one thing but many things — a whole codebase,
@@ -497,5 +679,6 @@ can't verify it from what's available."
 
 For deeper examples and domain-specific templates, see:
 - `references/domain-checklists.md` — Absence checklists for 10+ artifact types (code, git, UI, data, infra, email, strategy, writing, processes)
-- `references/code-review-examples.md` — Worked examples for PRs and code
-- `references/strategy-examples.md` — Worked examples for business/strategy artifacts
+- `references/code-review-examples.md` — Worked examples for PRs and code (prophetic mode)
+- `references/strategy-examples.md` — Worked examples for business/strategy artifacts (prophetic mode)
+- `references/debugging-examples.md` — Worked examples for bugs and incidents (diagnostic mode)
