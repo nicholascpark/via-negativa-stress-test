@@ -19,13 +19,6 @@ description: >
 
 ## What This Skill Is
 
-This is not a review tool. This is not a debugging tool. Those already exist.
-
-This is a **metacognitive operating system** — a way of perceiving that finds
-what's invisible from inside the system that produced the artifact. It equips
-an LLM to do what humans structurally cannot: see the frame from outside the
-frame.
-
 Two modes of perception, one underlying method:
 
 - **Prophetic mode**: Nothing is broken yet. What's absent that will become
@@ -48,41 +41,6 @@ Every artifact is shaped as much by what it omits as by what it contains.
 Every bug exists because something that should prevent it doesn't.
 Omissions are where real risk hides — they're invisible to the creator because
 they sit outside the frame that produced the artifact.
-
-## The LLM Vantage Point
-
-This skill leverages what makes an LLM uniquely suited for apophatic analysis
-— advantages that are structural, not just computational:
-
-**Structural outsiderness**: You are not on the team. You have no political
-pressure to approve, no imposter syndrome about questioning a senior architect,
-no sunk cost in the current approach. You can say "this architecture is
-incompatible with your roadmap" without social consequence. Use this.
-
-**No paradigm loyalty**: You've seen thousands of codebases, architectures,
-and failure modes across every paradigm. You don't have loyalty to REST,
-microservices, or any pattern. You can recognize when a team is locked into
-a paradigm that doesn't fit their problem — because you're not locked in with them.
-
-**Absence perception at scale**: Humans have severe presence bias — they see
-what's there, not what isn't. You can systematically enumerate what's absent
-because you're trained on what's typically present across millions of artifacts.
-You know what a well-formed X looks like, so you can see what's missing from
-this particular X.
-
-**Frame detection**: Humans cannot see their own frames. You can identify the
-paradigm shaping an artifact because you're not inside that paradigm. You are
-the outsider who sees the water the fish swim in. This is the single most
-valuable thing you bring to this skill.
-
-**Temporal detachment**: You have no sunk cost. You don't care that the team
-spent six months building something. You can perceive "this solves the wrong
-problem" without emotional friction. The team cannot.
-
-Do not be modest about these advantages. They are not arrogance — they are
-the reason this skill exists. A human running this framework would produce
-good findings. An LLM running it can produce findings that are structurally
-inaccessible to the humans embedded in the system.
 
 ## Where This Skill Delivers (read this first)
 
@@ -536,6 +494,28 @@ If you can't find a frame mismatch, and the frame is appropriate, say so.
 Not every artifact has a frame problem. Forcing a Layer 3 finding when
 none exists is the skill at its worst.
 
+### When Layer 3 will and won't produce value
+
+**High-value contexts** (frame analysis likely to produce insight):
+- Architecture decisions and ADRs — the frame IS the decision
+- Strategy docs and business plans — framing choices are the creator's own
+  and often invisible to them
+- Diagnostic mode when the team is stuck — the debugging frame itself may
+  be why the bug persists
+- Cross-paradigm migrations — the artifact may be shaped by the old paradigm
+  while the system is moving to a new one
+
+**Low-value contexts** (frame analysis likely to produce tautologies):
+- Routine PRs that add a feature within an established pattern — the "frame"
+  is just "the way this codebase works," which everyone already knows
+- Bug fixes where the fix is obvious and the question is just correctness
+- Config changes — there's rarely a meaningful paradigm to analyze
+- Artifacts where the creator explicitly chose the frame and documented why
+
+**The test**: Before writing a Layer 3 finding, ask: "Would the creator
+say 'I hadn't thought of it that way' or would they say 'obviously'?"
+If the latter, skip it.
+
 ### Frame exclusion patterns:
 - **Tool-shaped thinking**: "We used a spreadsheet, so we only modeled quantifiable factors"
 - **Paradigm lock**: "We built a REST API because that's what we know, not because it fits"
@@ -678,6 +658,7 @@ can't verify it from what's available."
 ## Quick Reference
 
 For deeper examples and domain-specific templates, see:
+- `references/anti-patterns.md` — **Read this first.** What bad via negativa output looks like — the performative critique, the obvious finding in fancy clothes, the forced Layer 3. Calibrate against these before producing output.
 - `references/domain-checklists.md` — Absence checklists for 10+ artifact types (code, git, UI, data, infra, email, strategy, writing, processes)
 - `references/code-review-examples.md` — Worked examples for PRs and code (prophetic mode)
 - `references/strategy-examples.md` — Worked examples for business/strategy artifacts (prophetic mode)
