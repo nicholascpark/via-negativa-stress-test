@@ -87,22 +87,44 @@ echo ""
 
 GREP_PATTERN=$(printf '%s\|' "${!SEARCH_TERMS[@]}" | sed 's/\\|$//')
 
-RESULTS=$(grep -rl "$GREP_PATTERN" "$REPO_ROOT" \
-    --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' \
-    --include='*.py' --include='*.go' --include='*.rb' --include='*.java' \
-    --include='*.rs' --include='*.c' --include='*.cpp' --include='*.h' \
-    --include='*.yaml' --include='*.yml' --include='*.json' --include='*.toml' \
-    --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor \
-    --exclude-dir=dist --exclude-dir=build --exclude-dir=__pycache__ \
-    --exclude-dir=.next --exclude-dir=target --exclude-dir=venv \
-    2>/dev/null | sort -u || true)
+# Import-aware pattern: prioritize real dependencies (import/require/from/use/include)
+# over incidental string matches (comments, variable names, docs).
+IMPORT_PATTERN="\(import\|require\|from\|use \|include\|#include\).*\(${GREP_PATTERN}\)"
+
+EXCLUDE_DIRS="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor"
+EXCLUDE_DIRS="$EXCLUDE_DIRS --exclude-dir=dist --exclude-dir=build --exclude-dir=__pycache__"
+EXCLUDE_DIRS="$EXCLUDE_DIRS --exclude-dir=.next --exclude-dir=target --exclude-dir=venv"
+
+CODE_INCLUDES="--include=*.ts --include=*.tsx --include=*.js --include=*.jsx"
+CODE_INCLUDES="$CODE_INCLUDES --include=*.py --include=*.go --include=*.rb --include=*.java"
+CODE_INCLUDES="$CODE_INCLUDES --include=*.rs --include=*.c --include=*.cpp --include=*.h"
+
+CONFIG_INCLUDES="--include=*.yaml --include=*.yml --include=*.json --include=*.toml"
+
+# High-confidence: files that import/require the changed symbols
+IMPORT_RESULTS=$(eval grep -rl "'$IMPORT_PATTERN'" "'$REPO_ROOT'" $CODE_INCLUDES $EXCLUDE_DIRS 2>/dev/null | sort -u || true)
+
+# Config files: no import statements, so any reference matters
+CONFIG_RESULTS=$(eval grep -rl "'$GREP_PATTERN'" "'$REPO_ROOT'" $CONFIG_INCLUDES $EXCLUDE_DIRS 2>/dev/null | sort -u || true)
+
+RESULTS=$(printf '%s\n%s' "$IMPORT_RESULTS" "$CONFIG_RESULTS" | grep -v '^$' | sort -u)
 
 AFFECTED=""
+AFFECTED_IMPORT=""
+AFFECTED_CONFIG=""
 for result in $RESULTS; do
     rel=$(realpath --relative-to="$REPO_ROOT" "$result" 2>/dev/null || echo "$result")
     is_self=false
     for cf in "${CHANGED_FILES[@]}"; do [[ "$rel" == "$cf" ]] && is_self=true && break; done
-    $is_self || AFFECTED="${AFFECTED}${rel}\n"
+    $is_self && continue
+
+    # Classify as import-based (high confidence) or config reference
+    if echo "$IMPORT_RESULTS" | grep -qF "$result"; then
+        AFFECTED_IMPORT="${AFFECTED_IMPORT}${rel}\n"
+    else
+        AFFECTED_CONFIG="${AFFECTED_CONFIG}${rel}\n"
+    fi
+    AFFECTED="${AFFECTED}${rel}\n"
 done
 
 if [[ -z "$AFFECTED" ]]; then
@@ -113,12 +135,27 @@ else
     echo "───────────────────────────────────────────────────"
     echo "  BLAST RADIUS: ${COUNT} files outside the diff"
     echo "───────────────────────────────────────────────────"
-    echo ""
-    echo -e "$AFFECTED" | grep -v '^$' | while read -r f; do
-        matches=$(grep -oh "$GREP_PATTERN" "$REPO_ROOT/$f" 2>/dev/null | sort -u | head -5 | tr '\n' ', ' | sed 's/,$//')
-        echo "  → $f"
-        [[ -n "$matches" ]] && echo "    references: $matches"
-    done
+
+    if [[ -n "$AFFECTED_IMPORT" ]]; then
+        ICOUNT=$(echo -e "$AFFECTED_IMPORT" | grep -cv '^$')
+        echo ""
+        echo "  Direct dependencies ($ICOUNT files — import/require/use):"
+        echo -e "$AFFECTED_IMPORT" | grep -v '^$' | while read -r f; do
+            matches=$(grep -oh "$GREP_PATTERN" "$REPO_ROOT/$f" 2>/dev/null | sort -u | head -5 | tr '\n' ', ' | sed 's/,$//')
+            echo "  → $f"
+            [[ -n "$matches" ]] && echo "    references: $matches"
+        done
+    fi
+
+    if [[ -n "$AFFECTED_CONFIG" ]]; then
+        CCOUNT=$(echo -e "$AFFECTED_CONFIG" | grep -cv '^$')
+        echo ""
+        echo "  Config/data references ($CCOUNT files):"
+        echo -e "$AFFECTED_CONFIG" | grep -v '^$' | while read -r f; do
+            echo "  → $f"
+        done
+    fi
+
     echo ""
     echo "These files depend on interfaces modified by this change."
     echo "Verify they remain compatible."
