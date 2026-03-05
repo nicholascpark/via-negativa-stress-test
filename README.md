@@ -44,7 +44,7 @@ this bug doesn't make sense — what am I missing?
 
 | Script | Answers |
 |--------|---------|
-| `blast-radius.sh` | Who is affected by this change that the diff doesn't show? |
+| `blast-radius.sh` | Who is affected by this change that the diff doesn't show? (import-aware) |
 | `co-change-gaps.sh` | What files usually change alongside this but weren't changed? |
 | `churn-report.sh` | Is this a fragile area that keeps getting patched? |
 | `abandoned-approaches.sh` | What did previous engineers try and abandon here? |
@@ -56,7 +56,16 @@ this bug doesn't make sense — what am I missing?
 Four-layer progressive analysis: **Absence Inventory** → **Load-Bearing Assumptions** → **Frame Exclusions** → **Via Negativa Design**. Default depth includes frame analysis (Layers 1–3) — that's where the differentiating insight lives.
 
 See `SKILL.md` for full methodology.
-See `references/` for worked examples (code review, strategy, debugging).
+
+## References
+
+| File | Purpose |
+|------|---------|
+| `references/anti-patterns.md` | What bad output looks like — calibrate against these before producing findings |
+| `references/code-review-examples.md` | Worked examples for PRs and code (prophetic mode) |
+| `references/strategy-examples.md` | Worked examples for business/strategy artifacts (prophetic mode) |
+| `references/debugging-examples.md` | Worked examples for bugs and incidents (diagnostic mode) |
+| `references/domain-checklists.md` | Absence checklists for 10+ artifact types |
 
 ## License
 
