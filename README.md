@@ -1,6 +1,6 @@
 # Via Negativa Stress Test
 
-A metacognitive skill that equips an LLM with apophatic perception — the ability to see what's **absent, assumed, and structurally excluded** from any artifact or system.
+A metacognitive skill that equips an LLM with negative perception — the ability to see what's **absent, assumed, and structurally excluded** from any artifact or system.
 
 Most review asks *"is what's here correct?"*
 Most debugging asks *"where is the error?"*
