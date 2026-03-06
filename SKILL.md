@@ -13,23 +13,31 @@ description: >
   target-agnostic: code, PRs, bugs, incidents, strategies, architectures, designs,
   conversations, ideas — if something exists, this skill can perceive what's missing
   from it. If something is broken, this skill can find the absence it fell through.
+  Also operates as a pre-commit hook for agentic cognition: audit an agent's plan
+  before execution, diagnose why an agent is stuck in a loop, or challenge the
+  framing of a task before work begins.
 ---
 
 # Via Negativa Stress Test
 
 ## What This Skill Is
 
-Two modes of perception, one underlying method:
+Three modes of perception, one underlying method:
 
 - **Prophetic mode**: Nothing is broken yet. What's absent that will become
   the failure? What's invisible that would change the decision if seen?
 - **Diagnostic mode**: Something is broken. What structural absence made this
   class of failure inevitable? What's missing from the system that would make
   this bug impossible?
+- **Agent mode**: An autonomous agent is about to act. What is its reasoning
+  blind to? Is it solving the wrong problem? Is it stuck in a loop because
+  its frame doesn't fit the problem?
 
-Both modes use the same cognitive operations — apophatic thinking (knowing by
-negation) and frame analysis (seeing the paradigm, not just the content). The
-difference is the entry point and the shape of the output.
+All three modes use the same cognitive operations — apophatic thinking (knowing
+by negation) and frame analysis (seeing the paradigm, not just the content).
+The difference is the entry point, the speed constraint, and the shape of the
+output. Prophetic and diagnostic modes produce analytical reports for humans.
+Agent mode produces structured verdicts for agentic loops.
 
 ## Core Principle
 
@@ -655,6 +663,276 @@ can't verify it from what's available."
 
 ---
 
+## Agent Mode: Pre-Commit Hook for Cognition
+
+### What This Is
+
+A compressed via-negativa pass designed to run at agentic decision points —
+the moment an autonomous agent (coding agent, planning agent, debugging agent)
+commits to a plan before executing it. The goal is not to review an artifact
+someone made. It's to intercept the agent's own reasoning and surface what
+it's blind to before it acts.
+
+This is not reflection. Reflection asks "is my plan good?" and produces a
+better version of the same plan. Agent mode asks "what is my plan blind to?"
+and may reveal that the plan solves the wrong problem.
+
+### Three intervention points
+
+Agent mode operates at three distinct moments in an agentic loop:
+
+**1. Pre-execution audit** — Before the agent acts on a plan.
+**2. Loop-break diagnostic** — When the agent is stuck or looping.
+**3. Task-framing challenge** — When the agent interprets a user's request
+before starting work.
+
+Each has its own protocol below.
+
+---
+
+### Intervention 1: Pre-Execution Audit
+
+**When to trigger**: The agent has generated a plan (fix a bug, refactor a
+module, implement a feature, choose an architecture) and is about to execute.
+
+**Input**: The agent's reasoning trace and intended action.
+- What does the agent believe is true?
+- What does the agent intend to do?
+- What is the agent's stated rationale?
+
+**Protocol** (compressed Layer 1 + Layer 3, one pass):
+
+1. **Assumption scan** (from Layer 2, compressed):
+   List the 1–3 most load-bearing assumptions in the plan. For each:
+   is it validated, plausible, or fragile? Focus only on assumptions that,
+   if wrong, would make the entire plan fail — not just produce a suboptimal
+   result.
+
+2. **Absence scan** (from Layer 1, compressed):
+   What is the plan not considering that is within its blast radius?
+   Apply the Relevance Gate ruthlessly — only findings that are proximate,
+   consequential, and non-obvious to the agent's own reasoning. Max 3 findings.
+
+3. **Frame check** (from Layer 3, compressed):
+   Is the agent solving the right problem? Does the plan's framing match
+   the problem's actual shape? Specifically:
+   - Is this a problem-solving plan when the real need is problem-understanding?
+   - Is the agent optimizing when it should be exploring?
+   - Is the agent treating a symptom as the root cause?
+   - Is the plan shaped by the agent's capabilities rather than the problem's
+     requirements? (hammer/nail)
+
+   If the frame fits, say so and move on. Don't force a frame finding.
+
+**Output format** (structured, for the agent loop to branch on):
+
+```
+## Pre-Execution Audit
+
+**Proceed**: yes | yes-with-caveats | pause-and-reframe
+
+**Blind spots** (max 3):
+- [what the plan is not considering] → [concrete risk if unaddressed]
+
+**Fragile assumptions** (max 2):
+- [assumption] → [what breaks if wrong] → [how to validate before acting]
+
+**Frame check**: [fit | mismatch]
+- [If mismatch: what problem the agent is actually solving vs what problem
+  needs solving. One sentence each.]
+
+**Recommendation**: [proceed | address blind spots first | reframe the problem]
+```
+
+**Speed constraint**: This must complete in a single pass. No multi-layer
+progressive disclosure. The value is in fast interception, not thorough
+analysis. If a full stress test is warranted, the audit should recommend
+pausing for one — not try to be one.
+
+---
+
+### Intervention 2: Loop-Break Diagnostic
+
+**When to trigger**: The agent has attempted the same class of action 2+
+times, is generating similar plans repeatedly, or is oscillating between
+approaches without converging.
+
+**Input**: The agent's recent action history — what it tried, what failed,
+what it tried next.
+
+**Protocol** (diagnostic mode, compressed):
+
+1. **Pattern recognition**: What is the agent repeating? Name the loop.
+   Not "it tried three times" but "it's applying fix-the-symptom strategies
+   to a structural problem" or "it's searching for the bug in the wrong
+   layer of the stack."
+
+2. **Frame diagnosis** (Layer 3, diagnostic lens):
+   Why is the agent stuck? The answer is almost never "it needs to try
+   harder." Common loop causes:
+   - **Frame lock**: The agent is debugging in Layer X when the bug is in
+     Layer Y. It keeps generating Layer X solutions because its frame
+     excludes Layer Y.
+   - **False unity**: The agent is treating two different problems as one.
+     Each attempt partially addresses one problem, which makes the other
+     worse.
+   - **Avoidance**: The agent's planning frame has no concept of
+     abandonment. It cannot conclude "this approach fundamentally won't
+     work" so it keeps iterating on a dead path.
+   - **Optimization vs. exploration**: The agent is refining within a
+     solution space when it should be searching across solution spaces.
+
+3. **Escape vector**: Based on the diagnosis, what should the agent do
+   differently? Not "try again" but a specific reframe — a different
+   layer to investigate, a different decomposition of the problem, or
+   an explicit recommendation to abandon the current approach.
+
+**Output format**:
+
+```
+## Loop-Break Diagnostic
+
+**Loop pattern**: [what the agent is repeating, named specifically]
+
+**Why it's stuck**: [frame diagnosis — one of: frame-lock, false-unity,
+avoidance, optimization-vs-exploration, or a novel diagnosis]
+
+**The agent's current frame**: [what the agent thinks the problem is]
+**What the frame excludes**: [what the agent cannot see from this frame]
+
+**Escape vector**: [specific reframe or alternative approach]
+**What to stop doing**: [the specific action pattern to abandon]
+```
+
+---
+
+### Intervention 3: Task-Framing Challenge
+
+**When to trigger**: A user gives the agent a task — "refactor this to
+microservices," "build an auth system," "plan this migration" — and the
+agent is about to interpret and execute.
+
+**Input**: The user's request and the agent's initial interpretation of it.
+
+**Protocol**:
+
+This is not about asking the user clarifying questions about what they
+want. Standard agents already do that. This is about surfacing what the
+user is not thinking about — assumptions buried in their request that,
+if surfaced, might change the request itself.
+
+1. **Inherited assumptions in the request**: What is the user taking for
+   granted that they might not have examined?
+   - "Refactor to microservices" assumes microservices are the right
+     architecture. Is the pain point actually coupling, and are there
+     simpler decoupling strategies?
+   - "Build an auth system" assumes auth needs to be built, not bought
+     or delegated.
+   - "Zero-downtime migration" assumes zero downtime is non-negotiable.
+     Is it, or is that inherited from a context that no longer applies?
+
+2. **The question behind the question**: What problem is the user
+   actually trying to solve? The stated task is often a solution they've
+   already chosen. What's the problem that led them to choose it, and
+   does that problem have other solutions they haven't considered?
+
+3. **Scope blindspots**: What will the user encounter during execution
+   that they haven't anticipated? Not "you forgot to mention logging"
+   but "this migration will require a data backfill strategy, and the
+   approach you choose for that will constrain your rollback options
+   in ways you should decide upfront, not discover mid-migration."
+
+**Output format**:
+
+```
+## Task-Framing Challenge
+
+**Inherited assumptions in this request** (max 3):
+- [assumption the user is making] → [why it's worth examining]
+
+**The problem behind the request**:
+[What problem the user is actually solving. One sentence.]
+[Whether the stated task is the only/best path to solving it. One sentence.]
+
+**What you'll encounter that you haven't planned for** (max 2):
+- [specific thing] → [why it matters to decide now rather than discover later]
+```
+
+**Critical constraint**: This intervention must be respectful of user
+agency. The user may have already considered everything you surface.
+Present findings as "worth confirming" not "you didn't think of this."
+The goal is to make the user's implicit reasoning explicit so they can
+confirm or revise — not to second-guess their competence.
+
+---
+
+### Agent Mode Anti-Patterns
+
+These are the failure modes specific to agent mode. The general
+anti-patterns in `references/anti-patterns.md` also apply.
+
+**1. The Rubber-Stamp Audit**
+Running a pre-execution audit that always says "proceed." If the audit
+never catches anything, it's not filtering hard enough on frame check,
+or the threshold for "pause-and-reframe" is too high. An audit that
+always passes is security theater.
+
+**2. The Overthinking Stall**
+Running a pre-execution audit on trivial actions (renaming a variable,
+adding a log line, fixing a typo). Agent mode should only trigger at
+*consequential* decision points — plan commits, architecture choices,
+debugging direction changes. Don't audit every action; audit commitments.
+
+**3. The Reflection Disguise**
+Producing output that's actually reflection ("let me verify my plan is
+correct") dressed up as via negativa. The test: does the output surface
+something the agent wasn't already considering? If it just validates or
+iterates on the existing plan, it's reflection, not via negativa.
+
+**4. The Infinite Regress**
+Running via negativa on the via negativa output. "But what if my audit
+missed something?" leads to audit loops. One pass. If the audit
+recommends a reframe, execute the reframe and re-audit once. Never
+more than two passes.
+
+**5. The Condescending Challenge**
+Task-framing challenges that second-guess competent, well-considered
+user requests. "You said microservices, but have you considered a
+monolith?" when the user has 50 services already and knows exactly
+what they want. Apply the non-obvious criterion from the Relevance
+Gate — if the user clearly already knows, don't surface it.
+
+---
+
+### Integrating Agent Mode into an Agentic System
+
+Agent mode is designed to be inserted into existing agentic loops, not
+to replace them. The integration point is the decision boundary — the
+moment between "the agent has decided what to do" and "the agent does it."
+
+**Minimal integration** (start here):
+Insert a pre-execution audit at one decision point — the moment the
+agent commits to a plan. Use Layer 1+3 compressed. Measure: how often
+does the audit surface something that would have caused a failure or
+wasted iteration? If the hit rate is > 15%, expand. If it's noise,
+tune the Relevance Gate for machine-generated reasoning (which tends
+to be more internally consistent but more frame-locked than human
+reasoning).
+
+**Loop-break integration** (add second):
+Monitor the agent's action history. When 2+ similar actions have
+failed, trigger a loop-break diagnostic instead of a retry. Measure:
+does the agent escape the loop faster with diagnosis than with
+retry-with-variation?
+
+**Full integration**:
+All three interventions active. Pre-execution audit on plan commits,
+loop-break diagnostic on detected loops, task-framing challenge on
+initial user requests. The system should have a bypass for trivial
+actions (the Overthinking Stall anti-pattern).
+
+---
+
 ## Quick Reference
 
 For deeper examples and domain-specific templates, see:
@@ -663,3 +941,4 @@ For deeper examples and domain-specific templates, see:
 - `references/code-review-examples.md` — Worked examples for PRs and code (prophetic mode)
 - `references/strategy-examples.md` — Worked examples for business/strategy artifacts (prophetic mode)
 - `references/debugging-examples.md` — Worked examples for bugs and incidents (diagnostic mode)
+- `references/agent-mode-examples.md` — Worked examples for agent integration (pre-execution audit, loop-break, task-framing)

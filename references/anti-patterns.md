@@ -148,3 +148,95 @@ signal.** The skill's value is not in finding everything that's absent — it's
 in finding the *few things* whose absence actually matters. When in doubt,
 cut the finding. A short list where every item changes the creator's thinking
 is worth infinitely more than a long list that gets ignored.
+
+---
+
+## Agent Mode Anti-Patterns
+
+These apply when via negativa is used inside agentic loops (pre-execution
+audits, loop-break diagnostics, task-framing challenges). See the Agent
+Mode section of `SKILL.md` for full definitions.
+
+### 8. The Rubber-Stamp Audit
+
+**What it looks like**: A pre-execution audit that always says "proceed."
+
+**Why it fails**: An audit that never catches anything is not filtering —
+it's performing safety without providing it. If the frame check always
+says "fit" and blind spots are always empty, the threshold is too high
+or the audit is doing reflection (validating the plan) instead of via
+negativa (finding what the plan is blind to).
+
+**The fix**: Track audit outcomes. If > 90% are "proceed" with no caveats,
+the audit needs recalibration — either tighter assumption scrutiny or
+genuine frame-level questioning. Alternatively, the audit may be triggering
+on too many trivial decisions (see #9).
+
+---
+
+### 9. The Overthinking Stall
+
+**What it looks like**: Running a pre-execution audit on trivial actions —
+renaming a variable, adding a log line, fixing a typo.
+
+**Why it fails**: Agent mode is designed for consequential decision points.
+Auditing every action trains the agent (or user) to ignore audit output,
+and the latency cost adds up. The skill becomes overhead instead of insight.
+
+**The fix**: Only trigger on plan commits, architecture choices, and
+debugging direction changes. The test: "If this action is wrong, does it
+waste more than 5 minutes?" If no, skip the audit.
+
+---
+
+### 10. The Reflection Disguise
+
+**What it looks like**: Audit output that validates or iterates on the
+plan instead of surfacing what it's blind to.
+
+> **Bad**: "Your plan to add an index is sound. The migration syntax is
+> correct and the column choice is appropriate for the query pattern."
+
+**Why it fails**: This is reflection, not via negativa. It answers "is
+this good?" instead of "what is this blind to?" The plan may be correct
+for the wrong problem.
+
+**The fix**: Test every audit output: does it surface something the agent
+wasn't already considering? If the output only confirms what the agent
+already believes, it's reflection regardless of the formatting.
+
+---
+
+### 11. The Infinite Regress
+
+**What it looks like**: Running via negativa on the via negativa output,
+then auditing the audit.
+
+**Why it fails**: Meta-analysis has diminishing returns that become
+negative after one pass. The second audit will either agree with the
+first (wasted compute) or disagree (now you need a third to break the
+tie). This is a loop, and loops are the problem agent mode is supposed
+to solve.
+
+**The fix**: Hard limit: one audit pass. If the audit recommends a
+reframe, execute the reframe and re-audit once. Maximum two passes, ever.
+
+---
+
+### 12. The Condescending Challenge
+
+**What it looks like**: Task-framing challenges that second-guess
+well-considered user requests.
+
+> **Bad** (to a user with 50 microservices): "Your request to add a
+> service assumes microservices are the right architecture. Have you
+> considered a monolith?"
+
+**Why it fails**: Fails the non-obvious criterion from the Relevance
+Gate. The user clearly already made this decision. Surfacing it wastes
+their time and erodes trust in the skill.
+
+**The fix**: Apply the Relevance Gate's non-obvious criterion with
+extra weight in task-framing challenges. The user knows more about
+their context than the agent does. Challenge assumptions that are
+genuinely implicit, not decisions that are clearly intentional.
